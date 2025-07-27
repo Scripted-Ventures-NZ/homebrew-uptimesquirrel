@@ -1,4 +1,6 @@
 class UptimesquirrelAgent < Formula
+  include Language::Python::Virtualenv
+
   desc "System monitoring agent for UptimeSquirrel"
   homepage "https://uptimesquirrel.com"
   url "https://app.uptimesquirrel.com/downloads/agent/uptimesquirrel_agent_macos.py"
@@ -27,21 +29,24 @@ class UptimesquirrelAgent < Formula
     sha256 "051d961ad0c62a94e50ecf1af379c3aba230c66c710493493560c0c223c49f20"
   end
 
+  resource "charset-normalizer" do
+    url "https://files.pythonhosted.org/packages/source/c/charset-normalizer/charset-normalizer-3.3.2.tar.gz"
+    sha256 "f30c3cb33b24454a82faecaf01b19c18562b1e89558fb6c56de4d9118a032fd5"
+  end
+
+  resource "idna" do
+    url "https://files.pythonhosted.org/packages/source/i/idna/idna-3.6.tar.gz"
+    sha256 "9ecdbbd083b06798ae1e86adcbfe8ab1479cf864e4ee30fe4e46a003d12491ca"
+  end
+
   def install
-    # Create a virtual environment
-    venv = virtualenv_create(libexec, "python3.11")
-    
-    # Install Python dependencies
-    venv.pip_install resources
-    
-    # Also install charset-normalizer and idna via pip
-    venv.pip_install "charset-normalizer"
-    venv.pip_install "idna"
+    # Create virtual environment and install dependencies
+    virtualenv_install_with_resources
     
     # Install the agent script
-    libexec.install "uptimesquirrel_agent_macos.py" => "uptimesquirrel_agent.py"
+    (libexec/"uptimesquirrel_agent.py").write File.read("uptimesquirrel_agent_macos.py")
     
-    # Create wrapper script
+    # Create wrapper script that uses the virtualenv
     (bin/"uptimesquirrel-agent").write <<~EOS
       #!/bin/bash
       exec "#{libexec}/bin/python" "#{libexec}/uptimesquirrel_agent.py" "$@"
@@ -51,9 +56,6 @@ class UptimesquirrelAgent < Formula
     (etc/"uptimesquirrel").mkpath
     (var/"uptimesquirrel").mkpath
     (var/"log/uptimesquirrel").mkpath
-    
-    # Install sample configuration
-    (etc/"uptimesquirrel").install "agent.conf.sample" => "agent.conf.sample" if File.exist?("agent.conf.sample")
   end
 
   def post_install
