@@ -40,17 +40,23 @@ class UptimesquirrelAgent < Formula
   end
 
   def install
-    # Create virtual environment and install dependencies
-    virtualenv_install_with_resources
+    # Create a virtualenv in libexec
+    venv = virtualenv_create(libexec, "python3.11")
     
-    # Install the agent script
-    (libexec/"uptimesquirrel_agent.py").write File.read("uptimesquirrel_agent_macos.py")
+    # Install Python dependencies into the virtualenv
+    venv.pip_install resources
     
-    # Create wrapper script that uses the virtualenv
+    # Copy the agent script
+    libexec.install "uptimesquirrel_agent_macos.py"
+    
+    # Create wrapper script
     (bin/"uptimesquirrel-agent").write <<~EOS
       #!/bin/bash
-      exec "#{libexec}/bin/python" "#{libexec}/uptimesquirrel_agent.py" "$@"
+      exec "#{libexec}/bin/python" "#{libexec}/uptimesquirrel_agent_macos.py" "$@"
     EOS
+    
+    # Make wrapper executable
+    chmod 0755, bin/"uptimesquirrel-agent"
     
     # Create directories
     (etc/"uptimesquirrel").mkpath
@@ -77,6 +83,19 @@ class UptimesquirrelAgent < Formula
         monitor_temperature = true
       EOS
     end
+    
+    # Create networks.json if it doesn't exist
+    networks_file = etc/"uptimesquirrel/networks.json"
+    unless networks_file.exist?
+      networks_file.write <<~JSON
+        {
+          "interfaces": {
+            "en0": {"enabled": true, "description": "Wi-Fi"},
+            "en1": {"enabled": true, "description": "Ethernet"}
+          }
+        }
+      JSON
+    end
   end
 
   service do
@@ -93,7 +112,8 @@ class UptimesquirrelAgent < Formula
         1. Edit the configuration file:
            #{etc}/uptimesquirrel/agent.conf
 
-        2. Add your agent API key to the configuration
+        2. Add your agent API key from:
+           https://app.uptimesquirrel.com/agents
 
         3. Start the service:
            brew services start uptimesquirrel-agent
@@ -104,6 +124,9 @@ class UptimesquirrelAgent < Formula
 
       To check agent status:
         uptimesquirrel-agent --status
+
+      Network interfaces can be configured in:
+        #{etc}/uptimesquirrel/networks.json
     EOS
   end
 
