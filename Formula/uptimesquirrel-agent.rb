@@ -103,7 +103,7 @@ class UptimesquirrelAgent < Formula
     keep_alive true
     log_path var/"log/uptimesquirrel/agent.log"
     error_log_path var/"log/uptimesquirrel/agent.error.log"
-    environment_variables PATH: std_service_path_env
+    environment_variables PATH: std_service_path_env, HOMEBREW_NO_ENV_HINTS: "1"
   end
 
   def caveats
