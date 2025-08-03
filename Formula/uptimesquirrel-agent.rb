@@ -5,7 +5,7 @@ class UptimesquirrelAgent < Formula
   homepage "https://uptimesquirrel.com"
   url "https://app.uptimesquirrel.com/downloads/agent/uptimesquirrel_agent_macos.py?v=1.2.16"
   version "1.2.16"
-  sha256 "25f2373051264a11b6355576cf29c4b4b3e95fac0fb6c43d42231627f6554e72"
+  sha256 "019f7ed533661f72d2380100771a3984db65b7d4ace6183d4e67ee313a4a38b9"
 
   depends_on "python@3.11"
 
