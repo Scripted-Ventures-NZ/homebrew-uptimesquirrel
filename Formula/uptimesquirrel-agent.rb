@@ -106,6 +106,14 @@ class UptimesquirrelAgent < Formula
     environment_variables PATH: std_service_path_env, HOMEBREW_NO_ENV_HINTS: "1"
   end
 
+  def post_upgrade
+    # Restart the service if it's running to load the new version
+    if File.exist?("#{ENV["HOME"]}/Library/LaunchAgents/homebrew.mxcl.uptimesquirrel-agent.plist")
+      system "brew", "services", "restart", "uptimesquirrel-agent"
+      opoo "UptimeSquirrel agent service has been restarted to load the new version."
+    end
+  end
+
   def caveats
     <<~EOS
       To configure the UptimeSquirrel agent:
@@ -127,6 +135,8 @@ class UptimesquirrelAgent < Formula
 
       Network interfaces can be configured in:
         #{etc}/uptimesquirrel/networks.json
+        
+      Note: The agent service will be automatically restarted after upgrades.
     EOS
   end
 
