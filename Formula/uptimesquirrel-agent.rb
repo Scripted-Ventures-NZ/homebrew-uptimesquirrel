@@ -3,9 +3,9 @@ class UptimesquirrelAgent < Formula
 
   desc "System monitoring agent for UptimeSquirrel"
   homepage "https://uptimesquirrel.com"
-  url "https://app.uptimesquirrel.com/downloads/agent/uptimesquirrel_agent_macos.py?v=1.2.19"
-  version "1.2.19"
-  sha256 "b7d106c60fffea9914ab08aa46cd497706dc5de6f6161841f6e09ae69cd32c31"
+  url "https://app.uptimesquirrel.com/downloads/agent/uptimesquirrel_agent_macos.py?v=1.2.20"
+  version "1.2.20"
+  sha256 "e3641c39f12f7c169cb463db9e48082650737b5494f4cc7e2c2f17c225fffa9f"
 
   depends_on "python@3.11"
 
@@ -89,9 +89,19 @@ class UptimesquirrelAgent < Formula
     unless networks_file.exist?
       networks_file.write <<~JSON
         {
-          "interfaces": {
-            "en0": {"enabled": true, "description": "Wi-Fi"},
-            "en1": {"enabled": true, "description": "Ethernet"}
+          "version": 1,
+          "max_enabled_interfaces": 4,
+          "interface_settings": {
+            "en0": {
+              "description": "Ethernet",
+              "enabled": true,
+              "display_order": 1
+            },
+            "en1": {
+              "description": "Wi-Fi",
+              "enabled": true,
+              "display_order": 2
+            }
           }
         }
       JSON
