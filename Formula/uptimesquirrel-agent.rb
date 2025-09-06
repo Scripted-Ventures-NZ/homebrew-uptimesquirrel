@@ -1,11 +1,11 @@
 class UptimesquirrelAgent < Formula
   include Language::Python::Virtualenv
 
-  desc "System monitoring agent for UptimeSquirrel"
+  desc "System monitoring agent for UptimeSquirrel with check execution support"
   homepage "https://uptimesquirrel.com"
-  url "https://app.uptimesquirrel.com/downloads/agent/uptimesquirrel_agent_macos.py?v=1.2.22"
-  version "1.2.22"
-  sha256 "5e2e09fa165a51cd9780dc9cd893c1794f70d6642487346034cf21f45acae8b3"
+  url "https://app.uptimesquirrel.com/downloads/agent/uptimesquirrel_agent_macos.py?v=2.0.0"
+  version "2.0.0"
+  sha256 "cbddf7048d4853c644d2886851242160816817ba5b8577290326a015cefd87a4"
 
   depends_on "python@3.11"
 
@@ -76,6 +76,12 @@ class UptimesquirrelAgent < Formula
         [agent]
         interval = 60
         hostname = #{`hostname -s`.strip}
+        agent_id = YOUR_AGENT_ID_HERE
+        home_region = us-west-2
+        
+        # Check execution settings (v2.0+ - Business/Enterprise plans)
+        check_execution_enabled = true
+        max_concurrent_checks = 10
         
         # macOS specific settings
         [macos]
