@@ -42,32 +42,32 @@ class UptimesquirrelAgent < Formula
   # aiohttp dependencies for check execution
   resource "aiohttp" do
     url "https://files.pythonhosted.org/packages/source/a/aiohttp/aiohttp-3.12.15.tar.gz"
-    sha256 "dfb4dd4d96e4e7dfdd3e7fcb7bf4ac20f3c79ea24d8bc93a7b07ed5fb7e999f7"
+    sha256 "4fc61385e9c98d72fcdf47e6dd81833f47b2f77c114c29cd64a361be57a763a2"
   end
 
   resource "multidict" do
     url "https://files.pythonhosted.org/packages/source/m/multidict/multidict-6.6.4.tar.gz"
-    sha256 "0487b2df05c46b7ff73b7fcb7abab6f51ea9b83ddc2b38262e29d2da6a3b63e"
+    sha256 "d2d4e4787672911b48350df02ed3fa3fffdc2f2e8ca06dd6afdf34189b76a9dd"
   end
 
   resource "yarl" do
     url "https://files.pythonhosted.org/packages/source/y/yarl/yarl-1.20.1.tar.gz"
-    sha256 "1de7e21b89e2a5d5dadc16a5b20cfa7a0eb0cc3b4cc89d7a2d2fb69adde94797"
+    sha256 "d017a4997ee50c91fd5466cef416231bb82177b93b029906cefc542ce14c35ac"
   end
 
   resource "aiosignal" do
     url "https://files.pythonhosted.org/packages/source/a/aiosignal/aiosignal-1.4.0.tar.gz"
-    sha256 "b40ca5f6cbb30e5c2071d96d2b9abacaeefe4b8e3a30c491a3d07f607a4edc5a"
+    sha256 "f47eecd9468083c2029cc99945502cb7708b082c232f9aca65da147157b251c7"
   end
 
   resource "frozenlist" do
     url "https://files.pythonhosted.org/packages/source/f/frozenlist/frozenlist-1.7.0.tar.gz"
-    sha256 "9c4b09f8b8b3af6d8b08b7c6f73a7a62a7fb67b5e2b23e21b3a45c06e6e0e78a"
+    sha256 "2e310d81923c2437ea8670467121cc3e9b0f76d3043cc1d2331d56c7fb7a3a8f"
   end
 
   resource "attrs" do
     url "https://files.pythonhosted.org/packages/source/a/attrs/attrs-25.3.0.tar.gz"
-    sha256 "a567b48f12b29d5ba3ce17b36f2ad3b2dc8d8d5b9a80b29b7e95e5d7b35f8f4a"
+    sha256 "75d7cefc7fb576747b2c81b4442d4d4a1ce0900973527c011d1030fd3bf4af1b"
   end
 
   def install
