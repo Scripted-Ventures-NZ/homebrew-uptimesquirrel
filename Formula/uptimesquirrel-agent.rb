@@ -3,8 +3,8 @@ class UptimesquirrelAgent < Formula
 
   desc "System monitoring agent for UptimeSquirrel with check execution support"
   homepage "https://uptimesquirrel.com"
-  url "https://app.uptimesquirrel.com/downloads/agent/uptimesquirrel_agent_macos.py?v=2.0.0"
-  version "2.0.0"
+  url "https://app.uptimesquirrel.com/downloads/agent/uptimesquirrel_agent_macos.py?v=2.0.1"
+  version "2.0.1"
   sha256 "cbddf7048d4853c644d2886851242160816817ba5b8577290326a015cefd87a4"
 
   depends_on "python@3.11"
@@ -39,6 +39,37 @@ class UptimesquirrelAgent < Formula
     sha256 "9ecdbbd083b06798ae1e86adcbfe8ab1479cf864e4ee30fe4e46a003d12491ca"
   end
 
+  # aiohttp dependencies for check execution
+  resource "aiohttp" do
+    url "https://files.pythonhosted.org/packages/source/a/aiohttp/aiohttp-3.12.15.tar.gz"
+    sha256 "dfb4dd4d96e4e7dfdd3e7fcb7bf4ac20f3c79ea24d8bc93a7b07ed5fb7e999f7"
+  end
+
+  resource "multidict" do
+    url "https://files.pythonhosted.org/packages/source/m/multidict/multidict-6.6.4.tar.gz"
+    sha256 "0487b2df05c46b7ff73b7fcb7abab6f51ea9b83ddc2b38262e29d2da6a3b63e"
+  end
+
+  resource "yarl" do
+    url "https://files.pythonhosted.org/packages/source/y/yarl/yarl-1.20.1.tar.gz"
+    sha256 "1de7e21b89e2a5d5dadc16a5b20cfa7a0eb0cc3b4cc89d7a2d2fb69adde94797"
+  end
+
+  resource "aiosignal" do
+    url "https://files.pythonhosted.org/packages/source/a/aiosignal/aiosignal-1.4.0.tar.gz"
+    sha256 "b40ca5f6cbb30e5c2071d96d2b9abacaeefe4b8e3a30c491a3d07f607a4edc5a"
+  end
+
+  resource "frozenlist" do
+    url "https://files.pythonhosted.org/packages/source/f/frozenlist/frozenlist-1.7.0.tar.gz"
+    sha256 "9c4b09f8b8b3af6d8b08b7c6f73a7a62a7fb67b5e2b23e21b3a45c06e6e0e78a"
+  end
+
+  resource "attrs" do
+    url "https://files.pythonhosted.org/packages/source/a/attrs/attrs-25.3.0.tar.gz"
+    sha256 "a567b48f12b29d5ba3ce17b36f2ad3b2dc8d8d5b9a80b29b7e95e5d7b35f8f4a"
+  end
+
   def install
     # Create a virtualenv in libexec
     venv = virtualenv_create(libexec, "python3.11")
@@ -46,8 +77,14 @@ class UptimesquirrelAgent < Formula
     # Install Python dependencies into the virtualenv
     venv.pip_install resources
     
-    # Copy the agent script
+    # Download and install check execution modules
+    system "curl", "-s", "-o", "task_manager.py", "https://app.uptimesquirrel.com/downloads/agent/task_manager_macos.py"
+    system "curl", "-s", "-o", "check_executor.py", "https://app.uptimesquirrel.com/downloads/agent/check_executor_macos.py"
+    
+    # Copy all agent files
     libexec.install "uptimesquirrel_agent_macos.py"
+    libexec.install "task_manager.py"
+    libexec.install "check_executor.py"
     
     # Create wrapper script
     (bin/"uptimesquirrel-agent").write <<~EOS
@@ -74,20 +111,33 @@ class UptimesquirrelAgent < Formula
         key = YOUR_AGENT_KEY_HERE
 
         [agent]
-        interval = 60
-        hostname = #{`hostname -s`.strip}
-        agent_id = YOUR_AGENT_ID_HERE
-        home_region = us-west-2
-        
         # Check execution settings (v2.0+ - Business/Enterprise plans)
         check_execution_enabled = true
         max_concurrent_checks = 10
-        
-        # macOS specific settings
-        [macos]
-        monitor_launchd = true
-        monitor_temperature = true
+        agent_id = YOUR_AGENT_ID_HERE
+        home_region = us-west-2
+
+        [monitoring]
+        interval = 60
+        cpu_threshold = 80.0
+        memory_threshold = 85.0
+        disk_threshold = 90.0
+
+        [services]
+        # Add services to monitor (examples)
+        # monitor_nginx = true
+        # monitor_mysql = true
+        # monitor_postgresql = true
+        # monitor_redis = true
       EOS
+    else
+      # Update existing config if it's missing required sections
+      config_content = config_file.read
+      unless config_content.include?("check_execution_enabled")
+        # Add check execution settings to existing config
+        config_content = config_content.gsub(/\[agent\]/, "[agent]\n# Check execution settings (v2.0+ - Business/Enterprise plans)\ncheck_execution_enabled = true\nmax_concurrent_checks = 10")
+        config_file.atomic_write(config_content)
+      end
     end
     
     # Create networks.json if it doesn't exist
