@@ -173,11 +173,15 @@ class UptimesquirrelAgent < Formula
   end
 
   def post_upgrade
-    # Restart the service if it's running to load the new version
-    if File.exist?("#{ENV["HOME"]}/Library/LaunchAgents/homebrew.mxcl.uptimesquirrel-agent.plist")
-      system "brew", "services", "restart", "uptimesquirrel-agent"
-      opoo "UptimeSquirrel agent service has been restarted to load the new version."
-    end
+    # Always restart the service after upgrade to ensure new version is loaded
+    ohai "Restarting UptimeSquirrel agent service to load v#{version}..."
+    
+    # Use quiet flag to suppress errors if service isn't running
+    system "brew", "services", "restart", "uptimesquirrel-agent", "--quiet"
+    
+    opoo "IMPORTANT: UptimeSquirrel agent has been upgraded to v#{version}"
+    opoo "The service has been restarted automatically to load the new version."
+    opoo "Run 'uptimesquirrel-agent --status' to verify the new version is active."
   end
 
   def caveats
