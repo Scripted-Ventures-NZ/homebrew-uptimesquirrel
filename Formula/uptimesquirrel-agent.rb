@@ -3,9 +3,9 @@ class UptimesquirrelAgent < Formula
 
   desc "System monitoring agent for UptimeSquirrel with check execution support"
   homepage "https://uptimesquirrel.com"
-  url "https://app.uptimesquirrel.com/downloads/agent/uptimesquirrel_agent_macos.py?v=2.0.1"
-  version "2.0.1"
-  sha256 "cbddf7048d4853c644d2886851242160816817ba5b8577290326a015cefd87a4"
+  url "https://app.uptimesquirrel.com/downloads/agent/uptimesquirrel_agent_macos.py?v=2.0.2"
+  version "2.0.2"
+  sha256 "7da045ee91b415a897ee5cf44ef9cda5fcda64d6eaf6b014e8f0826f7af48790"
 
   depends_on "python@3.11"
 
