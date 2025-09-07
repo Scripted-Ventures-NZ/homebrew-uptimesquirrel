@@ -176,8 +176,24 @@ class UptimesquirrelAgent < Formula
     # Always restart the service after upgrade to ensure new version is loaded
     ohai "Restarting UptimeSquirrel agent service to load v#{version}..."
     
-    # Use quiet flag to suppress errors if service isn't running
-    system "brew", "services", "restart", "uptimesquirrel-agent", "--quiet"
+    # First stop the service completely
+    system "brew", "services", "stop", "uptimesquirrel-agent"
+    sleep 2
+    
+    # Force kill any remaining processes
+    system "pkill", "-f", "uptimesquirrel_agent_macos.py", "||", "true"
+    sleep 1
+    
+    # Start the service with the new version
+    system "brew", "services", "start", "uptimesquirrel-agent"
+    sleep 3
+    
+    # Verify the new version is running
+    if system "brew", "services", "list", "|", "grep", "-q", "uptimesquirrel-agent.*started"
+      ohai "✅ Service successfully restarted with v#{version}"
+    else
+      opoo "⚠️  Service restart may have failed. Please run 'brew services restart uptimesquirrel-agent' manually."
+    end
     
     opoo "IMPORTANT: UptimeSquirrel agent has been upgraded to v#{version}"
     opoo "The service has been restarted automatically to load the new version."
@@ -205,8 +221,10 @@ class UptimesquirrelAgent < Formula
 
       Network interfaces can be configured in:
         #{etc}/uptimesquirrel/networks.json
-        
+
       Note: The agent service will be automatically restarted after upgrades.
+      If the version doesn't update after 'brew upgrade', run:
+        brew services restart uptimesquirrel-agent
     EOS
   end
 
