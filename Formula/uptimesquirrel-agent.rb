@@ -39,7 +39,7 @@ class UptimesquirrelAgent < Formula
     sha256 "9ecdbbd083b06798ae1e86adcbfe8ab1479cf864e4ee30fe4e46a003d12491ca"
   end
 
-  # aiohttp dependencies for check execution
+  # aiohttp dependencies for Monitor execution
   resource "aiohttp" do
     url "https://files.pythonhosted.org/packages/source/a/aiohttp/aiohttp-3.12.15.tar.gz"
     sha256 "4fc61385e9c98d72fcdf47e6dd81833f47b2f77c114c29cd64a361be57a763a2"
@@ -77,7 +77,7 @@ class UptimesquirrelAgent < Formula
     # Install Python dependencies into the virtualenv
     venv.pip_install resources
     
-    # Download and install check execution modules
+    # Download and install Monitor execution modules
     system "curl", "-s", "-o", "task_manager.py", "https://app.uptimesquirrel.com/downloads/agent/task_manager_macos.py"
     system "curl", "-s", "-o", "check_executor.py", "https://app.uptimesquirrel.com/downloads/agent/check_executor_macos.py"
     
