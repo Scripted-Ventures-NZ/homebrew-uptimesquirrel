@@ -139,10 +139,8 @@ sudo brew services restart uptimesquirrel-agent
 
 ## Support
 
-- 📚 Documentation: [docs.uptimesquirrel.com](https://docs.uptimesquirrel.com/agents/macos)
 - 🐛 Issues: [GitHub Issues](https://github.com/Scripted-Ventures-NZ/homebrew-uptimesquirrel/issues)
 - 📧 Email: support@uptimesquirrel.com
-- 💬 Discord: [Join our community](https://discord.gg/uptimesquirrel)
 
 ## License
 
