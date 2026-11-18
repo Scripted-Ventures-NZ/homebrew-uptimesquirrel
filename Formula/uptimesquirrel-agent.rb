@@ -4,8 +4,9 @@ class UptimesquirrelAgent < Formula
   desc "System monitoring agent for UptimeSquirrel with check execution support"
   homepage "https://uptimesquirrel.com"
   url "https://app.uptimesquirrel.com/downloads/agent/uptimesquirrel_agent_macos.py?v=2.1.1"
+  # Unreleased security patch: assign a new release version before publication.
   version "2.1.1"
-  sha256 "5de98d29a0fcbe1b3d4c02cb1850ca63cf3bd86f2d27d8c412ec731a68e27354"
+  sha256 "7c5d0293ac2952163edecc4259c575e43b791a0e7a42881bfbecae57bb41a237"
 
   depends_on "python@3.11"
 
@@ -70,22 +71,32 @@ class UptimesquirrelAgent < Formula
     sha256 "75d7cefc7fb576747b2c81b4442d4d4a1ce0900973527c011d1030fd3bf4af1b"
   end
 
+  resource "task-manager" do
+    url "https://app.uptimesquirrel.com/downloads/agent/task_manager_macos.py?v=2.1.1"
+    sha256 "3d8f89edc2c490c50a81030403d3f6929c03a8ff74682e8ebcdddff722926be0"
+  end
+
+  resource "check-executor" do
+    url "https://app.uptimesquirrel.com/downloads/agent/check_executor_macos.py?v=2.1.1"
+    sha256 "879de41eee67ac20a4c71916213c51d2ef7ff780e01e77d4ed2bfae0358742b9"
+  end
+
   def install
     # Create a virtualenv in libexec
     venv = virtualenv_create(libexec, "python3.11")
     
     # Install Python dependencies into the virtualenv
-    venv.pip_install resources
+    venv.pip_install resources.reject { |r| %w[task-manager check-executor].include?(r.name) }
     
-    # Download and install Monitor execution modules
-    system "curl", "-s", "-o", "task_manager.py", "https://app.uptimesquirrel.com/downloads/agent/task_manager_macos.py"
-    system "curl", "-s", "-o", "check_executor.py", "https://app.uptimesquirrel.com/downloads/agent/check_executor_macos.py"
-    
-    # Copy all agent files
+    # Every executable source module is verified by Homebrew before installation.
     libexec.install "uptimesquirrel_agent_macos.py"
-    libexec.install "task_manager.py"
-    libexec.install "check_executor.py"
-    
+    resource("task-manager").stage do
+      libexec.install "task_manager_macos.py" => "task_manager.py"
+    end
+    resource("check-executor").stage do
+      libexec.install "check_executor_macos.py" => "check_executor.py"
+    end
+
     # Create wrapper script
     (bin/"uptimesquirrel-agent").write <<~EOS
       #!/bin/bash
@@ -140,6 +151,9 @@ class UptimesquirrelAgent < Formula
       end
     end
     
+    # Agent credentials are private to the Homebrew service owner.
+    chmod 0600, config_file
+
     # Create networks.json if it doesn't exist
     networks_file = etc/"uptimesquirrel/networks.json"
     unless networks_file.exist?
@@ -173,31 +187,9 @@ class UptimesquirrelAgent < Formula
   end
 
   def post_upgrade
-    # Always restart the service after upgrade to ensure new version is loaded
-    ohai "Restarting UptimeSquirrel agent service to load v#{version}..."
-    
-    # First stop the service completely
-    system "brew", "services", "stop", "uptimesquirrel-agent"
-    sleep 2
-    
-    # Force kill any remaining processes
-    system "pkill", "-f", "uptimesquirrel_agent_macos.py", "||", "true"
-    sleep 1
-    
-    # Start the service with the new version
-    system "brew", "services", "start", "uptimesquirrel-agent"
-    sleep 3
-    
-    # Verify the new version is running
-    if system "brew", "services", "list", "|", "grep", "-q", "uptimesquirrel-agent.*started"
-      ohai "✅ Service successfully restarted with v#{version}"
-    else
-      opoo "⚠️  Service restart may have failed. Please run 'brew services restart uptimesquirrel-agent' manually."
-    end
-    
-    opoo "IMPORTANT: UptimeSquirrel agent has been upgraded to v#{version}"
-    opoo "The service has been restarted automatically to load the new version."
-    opoo "Run 'uptimesquirrel-agent --status' to verify the new version is active."
+    # Never kill every matching process or start a service the owner had stopped.
+    opoo "After reviewing the upgrade, restart your existing service explicitly:"
+    opoo "  brew services restart uptimesquirrel-agent"
   end
 
   def caveats
